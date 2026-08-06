@@ -1,7 +1,6 @@
 // updated: skibidi
 // roblox: 1.0.0
 // sober: 1.0.0
-
 #pragma once
 #include <cstdint>
 

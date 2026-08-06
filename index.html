@@ -198,7 +198,8 @@
   .code-body{
     margin:0;
     padding:14px 0;
-    overflow-x:auto;
+    overflow:auto;
+    max-height:70vh;
     font-size:13px;
     line-height:1.65;
   }
@@ -214,12 +215,15 @@
 
   .line-num{
     color:var(--fg-faint);
-    width:34px;
+    width:38px;
     flex-shrink:0;
     text-align:right;
     margin-right:18px;
     user-select:none;
     font-size:12px;
+    position:sticky;
+    left:0;
+    background:var(--code-bg);
   }
 
   .line-content{
@@ -406,6 +410,8 @@
     lastUpdated.textContent = updated ? updated[1] : '—';
   }
 
+  const META_LINE_RE = /^\s*\/\/\s*(?:roblox|sober|updated)\s*(?:version)?\s*[:=]/i;
+
   // ---------- offset counting (for the status line only) ----------
 
   const OFFSET_PATTERNS = [
@@ -555,9 +561,10 @@
         rawText = text;
         rawLines = text.split(/\r?\n/);
         readVersions(text);
-        const offsetCount = countOffsets(rawLines);
-        statusText.textContent = `${offsetCount} offset${offsetCount === 1 ? '' : 's'} · ${rawLines.length} lines`;
-        render(rawLines);
+        const displayLines = rawLines.filter(line => !META_LINE_RE.test(line));
+        const offsetCount = countOffsets(displayLines);
+        statusText.textContent = `${offsetCount} offset${offsetCount === 1 ? '' : 's'} · ${displayLines.length} lines`;
+        render(displayLines);
         setState('ok');
       })
       .catch(err => {

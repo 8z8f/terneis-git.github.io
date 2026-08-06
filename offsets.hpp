@@ -1,6 +1,6 @@
-// @sober 1.0.0
-// @roblox 0.654.1.6540654
-// @updated 2026-08-06
+// updated: skibidi
+// roblox: 1.0.0
+// sober: 1.0.0
 
 #pragma once
 #include <cstdint>

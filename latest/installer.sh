@@ -153,7 +153,8 @@ extract_archive() {
     local archive="$1"
     [[ -e "$DEST_DIR" ]] && rm -rf "$DEST_DIR"
     mkdir -p "$DEST_DIR"
-
+    mkdir -p "$DEST_DIR/configs"
+    
     local top_count nested_count
     top_count=$(tar -tzf "$archive" | awk -F/ '{print $1}' | sort -u | wc -l)
     nested_count=$(tar -tzf "$archive" | grep -c '/' || true)
@@ -165,6 +166,35 @@ extract_archive() {
 
     find "$DEST_DIR" -mindepth 1 -print -quit | grep -q . \
         || die "extraction produced no files — archive layout unexpected."
+}
+
+install_desktop_file() {
+    local bin="$1" icon="$2"
+    [[ -z "$bin" ]] && return 1
+
+    local apps_dir="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
+    mkdir -p "$apps_dir"
+    local dest="$apps_dir/nyx-external.desktop"
+
+    {
+        printf '[Desktop Entry]\n'
+        printf 'Type=Application\n'
+        printf 'Name=NYX External\n'
+        printf 'GenericName=Roblox Overlay\n'
+        printf 'Comment=External overlay for Roblox on the Sober Linux runtime\n'
+        printf 'Exec=sudo %s\n' "$bin"
+        [[ -n "$icon" && -f "$icon" ]] && printf 'Icon=%s\n' "$icon"
+        printf 'Terminal=true\n'
+        printf 'Categories=Game;Utility;\n'
+        printf 'StartupNotify=false\n'
+    } > "$dest"
+
+    chmod 644 "$dest"
+    if command -v update-desktop-database >/dev/null 2>&1; then
+        update-desktop-database "$apps_dir" >/dev/null 2>&1 || true
+    fi
+
+    printf '%s' "$dest"
 }
 
 is_elf() {
@@ -237,10 +267,25 @@ size="$(human_size "$archive")"
 extract_archive "$archive"
 main_bin="$(mark_executable)"
 
+# Look for the bundled icon in the extract tree (NYX.png at the root, or
+# anywhere one level down — some archives nest assets in a folder).
+icon_file=""
+for cand in "${DEST_DIR}/NYX.png" "${DEST_DIR}"/*/NYX.png; do
+    [[ -f "$cand" ]] && { icon_file="$cand"; break; }
+done
+
+desktop_file=""
+if [[ -n "$main_bin" ]]; then
+    desktop_file="$(install_desktop_file "$main_bin" "$icon_file" || true)"
+fi
+
 row "system"   "$sys_line"
 row "packages" "$pkg_line"
 row "archive"  "${size}      ${A_DIM}${C_MUTED}NYX.tar.gz${A_RST}"
 row "installed" "${main_bin:-$DEST_DIR}"
+if [[ -n "$desktop_file" ]]; then
+    row "shortcut" "${desktop_file}"
+fi
 
 printf '\n' >&2
 if [[ -n "$main_bin" ]]; then

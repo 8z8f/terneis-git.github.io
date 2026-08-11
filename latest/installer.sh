@@ -154,7 +154,7 @@ extract_archive() {
     [[ -e "$DEST_DIR" ]] && rm -rf "$DEST_DIR"
     mkdir -p "$DEST_DIR"
     mkdir -p "$DEST_DIR/configs"
-    
+
     local top_count nested_count
     top_count=$(tar -tzf "$archive" | awk -F/ '{print $1}' | sort -u | wc -l)
     nested_count=$(tar -tzf "$archive" | grep -c '/' || true)
@@ -169,6 +169,14 @@ extract_archive() {
 }
 
 install_desktop_file() {
+    # Write a per-user .desktop launcher so NYX shows up in the app menu
+    # of every freedesktop-compliant DE (GNOME/KDE/XFCE/Cinnamon/etc.).
+    #
+    # Exec strategy: sudo in a terminal window. The alternative — pkexec
+    # for a graphical polkit prompt — sounds cleaner but breaks in practice
+    # because pkexec strips DISPLAY/XAUTHORITY, so an X-overlay app can't
+    # reach the user's X server. Terminal+sudo just works: the terminal
+    # inherits the user's X env, sudo prompts inline, external runs.
     local bin="$1" icon="$2"
     [[ -z "$bin" ]] && return 1
 

@@ -1,14 +1,3 @@
-#!/usr/bin/env bash
-# =============================================================================
-#  NYX external installer
-#
-#  Runtime deps
-#    libglfw.so.3   → glfw
-#    libX11.so.6    → libX11
-#    libGLX.so.0    → libglvnd / mesa
-#    libOpenGL.so.0 → libglvnd / mesa
-# =============================================================================
-
 set -euo pipefail
 
 readonly URL="https://epries.xyz/latest/NYX.tar.gz"
@@ -169,14 +158,6 @@ extract_archive() {
 }
 
 install_desktop_file() {
-    # Write a per-user .desktop launcher so NYX shows up in the app menu
-    # of every freedesktop-compliant DE (GNOME/KDE/XFCE/Cinnamon/etc.).
-    #
-    # Exec strategy: sudo in a terminal window. The alternative — pkexec
-    # for a graphical polkit prompt — sounds cleaner but breaks in practice
-    # because pkexec strips DISPLAY/XAUTHORITY, so an X-overlay app can't
-    # reach the user's X server. Terminal+sudo just works: the terminal
-    # inherits the user's X env, sudo prompts inline, external runs.
     local bin="$1" icon="$2"
     [[ -z "$bin" ]] && return 1
 
@@ -275,8 +256,6 @@ size="$(human_size "$archive")"
 extract_archive "$archive"
 main_bin="$(mark_executable)"
 
-# Look for the bundled icon in the extract tree (NYX.png at the root, or
-# anywhere one level down — some archives nest assets in a folder).
 icon_file=""
 for cand in "${DEST_DIR}/NYX.png" "${DEST_DIR}"/*/NYX.png; do
     [[ -f "$cand" ]] && { icon_file="$cand"; break; }

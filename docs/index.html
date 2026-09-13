@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>docs · epries</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="../assets/nyx.png" type="image/png">
+</head>
+<body>
+
+<nav class="nav">
+    <div class="nav-inner">
+        <a href="../" class="brand"><img src="../assets/nyx.png" alt="">epries<span class="dot">.</span></a>
+        <div class="nav-links">
+            <a href="../#features">features</a>
+            <a href="./" class="active">docs</a>
+            <a href="https://discord.gg/avy3yEgsn2" target="_blank" rel="noopener">discord</a>
+            <a href="../#buy" class="nav-cta">get access</a>
+        </div>
+    </div>
+</nav>
+
+<div class="docs-shell">
+
+    <aside class="docs-side">
+        <h4>guide</h4>
+        <ul>
+            <li><a href="./" class="active">overview</a></li>
+            <li><a href="installing.html">installing</a></li>
+            <li><a href="luau-api.html">luau vm api</a></li>
+        </ul>
+
+        <h4>on this page</h4>
+        <ul>
+            <li><a href="#what-it-is">what it is</a></li>
+            <li><a href="#requirements">requirements</a></li>
+            <li><a href="#quick-start">quick start</a></li>
+            <li><a href="#scripting">scripting</a></li>
+            <li><a href="#troubleshooting">troubleshooting</a></li>
+        </ul>
+    </aside>
+
+    <main class="docs-main">
+        <h1>Overview</h1>
+        <p class="lede">External overlay for Roblox on Linux via Sober. Reads memory, draws a menu through the compositor, executes Luau in-process through a callgate.</p>
+
+        <h2 id="what-it-is">What it is</h2>
+        <p>The external is two binaries: an updater called <code>install</code> and the actual overlay called <code>external</code>. The updater hits the CDN, verifies the manifest against a pinned public key, swaps binaries atomically, and launches the overlay.</p>
+        <p>The overlay itself opens a GLFW window with a transparent framebuffer, matches Sober's geometry, and stays above it. Input outside your menu windows passes through to Roblox via XShape. Memory reads and writes go through <code>/proc/&lt;pid&gt;/mem</code>.</p>
+
+        <h2 id="requirements">Requirements</h2>
+        <ul>
+            <li>Linux with X11 or Wayland (XWayland works)</li>
+            <li>Sober flatpak installed and launched at least once</li>
+            <li>A compositor that respects transparent framebuffers. Tested on Mutter, KWin, and Hyprland.</li>
+            <li>Around 40 MB of disk for the install directory</li>
+        </ul>
+
+        <h2 id="quick-start">Quick start</h2>
+        <ol>
+            <li>Download the installer from your dashboard after purchase.</li>
+            <li>Make it executable: <code>chmod +x install</code></li>
+            <li>Run it: <code>./install</code></li>
+            <li>Paste your license key when asked. The installer verifies, writes files to <code>~/.local/share/nyx</code>, and launches the overlay.</li>
+            <li>Start Sober. The overlay attaches once it finds the process.</li>
+            <li>Press <kbd>Insert</kbd> to toggle the menu.</li>
+        </ol>
+        <p>The install directory holds a small config, saved bookmarks and scripts, and the swap slot the updater uses. Deleting it uninstalls cleanly.</p>
+
+        <h2 id="scripting">Scripting</h2>
+        <p>The overlay ships with a full Luau VM. It reads Roblox state, draws overlays, binds keys, and talks back to Roblox through a callgate. Read the <a href="luau-api.html">full API reference</a> for every function.</p>
+
+        <pre><code>-- example: print your character position every 3 seconds
+task.spawn(function()
+    while true do
+        local c = game.Players.LocalPlayer.Character
+        if c and c.HumanoidRootPart then
+            print(c.HumanoidRootPart.Position)
+        end
+        task.wait(3)
+    end
+end)</code></pre>
+
+        <p>Scripts live in <code>~/.config/nyx/scripts</code>. The Scripts tab lists every <code>.lua</code> and <code>.luau</code> in there, plus lets you save the current editor buffer.</p>
+
+        <h2 id="troubleshooting">Troubleshooting</h2>
+
+        <h3 id="menu-black-background">Menu shows solid black where it should be transparent</h3>
+        <p>Your compositor is not compositing the overlay. On KDE the fix is usually one of the WM hints the overlay already sets. If it still happens, disable "Block compositing" as a window rule for the Nyx window, and confirm compositing is enabled globally in System Settings.</p>
+
+        <h3 id="cant-click-roblox">Cannot click Roblox while the overlay is up</h3>
+        <p>On Hyprland the overlay uses XShape to pass clicks through everywhere except inside its own menu windows. If clicks are still eaten, update to a recent Hyprland build. As a fallback add this to <code>~/.config/hypr/hyprland.conf</code>:</p>
+        <pre><code>windowrulev2 = nofocus, class:(Nyx External)</code></pre>
+
+        <h3 id="not-attaching">Overlay says "waiting for Sober"</h3>
+        <p>Sober is not running, or the flatpak is under a different name. Launch Sober first, then start the overlay.</p>
+    </main>
+
+</div>
+
+<footer>
+    <div class="footer-inner">
+        <div>epries · roblox external for linux</div>
+        <div class="footer-links">
+            <a href="../">home</a>
+            <a href="https://discord.gg/avy3yEgsn2" target="_blank" rel="noopener">discord</a>
+            <a href="../#buy">purchase</a>
+        </div>
+    </div>
+</footer>
+
+<script src="../assets/js/copy.js"></script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Installing · epries</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="../assets/nyx.png" type="image/png">
+</head>
+<body>
+
+<nav class="nav">
+    <div class="nav-inner">
+        <a href="../" class="brand"><img src="../assets/nyx.png" alt="">epries<span class="dot">.</span></a>
+        <div class="nav-links">
+            <a href="../#features">features</a>
+            <a href="./" class="active">docs</a>
+            <a href="https://discord.gg/avy3yEgsn2" target="_blank" rel="noopener">discord</a>
+            <a href="../#buy" class="nav-cta">get access</a>
+        </div>
+    </div>
+</nav>
+
+<div class="docs-shell">
+
+    <aside class="docs-side">
+        <h4>guide</h4>
+        <ul>
+            <li><a href="./">overview</a></li>
+            <li><a href="installing.html" class="active">installing</a></li>
+            <li><a href="luau-api.html">luau vm api</a></li>
+        </ul>
+        <h4>on this page</h4>
+        <ul>
+            <li><a href="#sober">install sober</a></li>
+            <li><a href="#installer">run the installer</a></li>
+            <li><a href="#first-launch">first launch</a></li>
+            <li><a href="#updating">updating</a></li>
+            <li><a href="#uninstall">uninstall</a></li>
+        </ul>
+    </aside>
+
+    <main class="docs-main">
+        <h1>Installing</h1>
+        <p class="lede">Five minutes from zero to menu.</p>
+
+        <h2 id="sober">Install Sober</h2>
+        <p>Sober is the Wine-based Roblox flatpak. If you already run Roblox on Linux you probably have it.</p>
+        <pre><code>flatpak install flathub org.vinegarhq.Sober
+flatpak run org.vinegarhq.Sober</code></pre>
+        <p>Log in once, join any game, close it. The overlay looks for the running process by class name, so Sober needs to have opened cleanly at least once.</p>
+
+        <h2 id="installer">Run the installer</h2>
+        <p>After purchase you get a link to the <code>install</code> binary and your license key. Drop the binary anywhere writable, mark it executable, and run:</p>
+        <pre><code>chmod +x install
+./install</code></pre>
+        <p>The installer verifies its own signature against a pinned public key, prompts for your license, and writes the payload to <code>~/.local/share/nyx</code>. It never asks for sudo.</p>
+
+        <h2 id="first-launch">First launch</h2>
+        <p>The installer launches the overlay when it finishes. If Sober is already running the menu attaches within a second. If not, launch Sober now, then rerun:</p>
+        <pre><code>~/.local/share/nyx/external</code></pre>
+        <p>Press <kbd>Insert</kbd> to toggle the menu. If you want a different toggle key, open Settings → Keybinds.</p>
+
+        <h2 id="updating">Updating</h2>
+        <p>Every time you run the launcher it hits the manifest, checks the signed version, and swaps the binary atomically if a newer one is out. Nothing else to do.</p>
+        <p>You can force a check by running <code>./install</code> again.</p>
+
+        <h2 id="uninstall">Uninstall</h2>
+        <p>Delete the install directory:</p>
+        <pre><code>rm -rf ~/.local/share/nyx ~/.config/nyx</code></pre>
+        <p>The first path holds the binaries and swap slot. The second holds configs, saved scripts, and bookmarks. Nothing else on your system is touched.</p>
+    </main>
+
+</div>
+
+<footer>
+    <div class="footer-inner">
+        <div>epries · roblox external for linux</div>
+        <div class="footer-links">
+            <a href="../">home</a>
+            <a href="https://discord.gg/avy3yEgsn2" target="_blank" rel="noopener">discord</a>
+            <a href="../#buy">purchase</a>
+        </div>
+    </div>
+</footer>
+
+<script src="../assets/js/copy.js"></script>
+</body>
+</html>

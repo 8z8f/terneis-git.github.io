@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>epries</title>
+    <meta name="description" content="Roblox external for Linux. Sober compatible.">
+    <meta property="og:title" content="epries">
+    <meta property="og:description" content="Roblox external for Linux. Sober compatible.">
+    <meta property="og:url" content="https://epries.xyz">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="assets/nyx.png" type="image/png">
+    <meta property="og:image" content="https://epries.xyz/assets/nyx.png">
+</head>
+<body>
+
+<nav class="nav">
+    <div class="nav-inner">
+        <a href="/" class="brand"><img src="assets/nyx.png" alt="">epries<span class="dot">.</span></a>
+        <div class="nav-links">
+            <a href="#features">features</a>
+            <a href="docs/">docs</a>
+            <a href="https://discord.gg/avy3yEgsn2" target="_blank" rel="noopener">discord</a>
+            <a href="#buy" class="nav-cta">get access</a>
+        </div>
+    </div>
+</nav>
+
+<header class="hero">
+    <h1>roblox external<br>for <span class="accent">linux</span>.</h1>
+    <p class="tagline">Runs against Sober on X11 and Wayland. No injection, no fake overlays, no dll hell. The overlay reads memory, draws through the compositor, and gets out of the way when you click through it.</p>
+    <div class="hero-ctas">
+        <a href="#buy" class="btn primary">get access</a>
+        <a href="docs/" class="btn">read docs</a>
+    </div>
+</header>
+
+<section id="features">
+    <div class="wrap">
+        <div class="section-title">features</div>
+        <h2 class="section-heading">Everything on one flat menu.</h2>
+        <p class="section-sub">No tabs hidden three levels deep. The tree sidebar shows what's on, what's off, and what to click next.</p>
+
+        <div class="feature-grid">
+
+            <div class="feature-card">
+                <div class="cat">combat</div>
+                <h3>Aimbot</h3>
+                <ul class="items">
+                    <li>fov circle with prediction</li>
+                    <li>mouse warp, silent, cframe modes</li>
+                    <li>sticky target, snap on new target</li>
+                    <li>head, root or auto target part</li>
+                    <li>whitelist and blacklist filters</li>
+                    <li>katana detection</li>
+                    <li>humanized aim curve</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="cat">combat</div>
+                <h3>Triggerbot and rage</h3>
+                <ul class="items">
+                    <li>hold-key or always-on trigger</li>
+                    <li>hitbox expander with 3d visualizer</li>
+                    <li>rage tp with wall-check distance</li>
+                    <li>desync with server-position ghost</li>
+                    <li>no-recoil</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="cat">movement</div>
+                <h3>Fly and motion</h3>
+                <ul class="items">
+                    <li>fly with pitch-follow and lift</li>
+                    <li>walkspeed, jump, hip height overrides</li>
+                    <li>sprint hold-key with speed slider</li>
+                    <li>noclip</li>
+                    <li>anti-gravity, gravity override</li>
+                    <li>tp to mouse, tp to coords</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="cat">movement</div>
+                <h3>Bookmarks and spectate</h3>
+                <ul class="items">
+                    <li>save named positions, teleport back</li>
+                    <li>return to death spot</li>
+                    <li>spectate player, camera push</li>
+                    <li>per-place auto-load</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="cat">visuals</div>
+                <h3>ESP</h3>
+                <ul class="items">
+                    <li>names, health, distance, flags</li>
+                    <li>box, corner, chams, glow outline</li>
+                    <li>skeleton, trail, off-screen arrows</li>
+                    <li>hide dead, hide teammates</li>
+                    <li>name whitelist filter</li>
+                    <li>display-name toggle</li>
+                    <li>loot and object esp</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="cat">visuals</div>
+                <h3>Radar and crosshair</h3>
+                <ul class="items">
+                    <li>mini radar with range slider</li>
+                    <li>dot, circle, cross, t-shape</li>
+                    <li>thickness and size control</li>
+                    <li>render fov circle</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="cat">world</div>
+                <h3>Lighting</h3>
+                <ul class="items">
+                    <li>full bright</li>
+                    <li>fog and atmosphere removal</li>
+                    <li>grass removal</li>
+                    <li>water transparency</li>
+                    <li>sun and moon position</li>
+                    <li>midnight, noon, sunset presets</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="cat">world</div>
+                <h3>Environment</h3>
+                <ul class="items">
+                    <li>proximity prompts through walls</li>
+                    <li>re-enable script-disabled prompts</li>
+                    <li>physics hz override</li>
+                    <li>toggleable background snow</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="cat">scripts</div>
+                <h3>Luau VM</h3>
+                <ul class="items">
+                    <li>full executor bridge to sober</li>
+                    <li>explorer with search, teleport-to-instance</li>
+                    <li>copy name, class, path, address</li>
+                    <li>save and load scripts</li>
+                    <li>editor tab with syntax highlight</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="cat">hud</div>
+                <h3>HUD elements</h3>
+                <ul class="items">
+                    <li>target hud, session stats, server info</li>
+                    <li>active features strip</li>
+                    <li>watermark, world position card</li>
+                    <li>account age readout</li>
+                    <li>positions set by typed x/y</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="cat">qol</div>
+                <h3>Settings</h3>
+                <ul class="items">
+                    <li>every key rebindable</li>
+                    <li>config save and load</li>
+                    <li>auto-load by placeid</li>
+                    <li>dense mode, menu opacity</li>
+                    <li>recent color autosave</li>
+                    <li>self-updater with signed manifest</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="cat">platform</div>
+                <h3>Linux native</h3>
+                <ul class="items">
+                    <li>x11 and xwayland</li>
+                    <li>works on hyprland, kwin, mutter</li>
+                    <li>xshape input passthrough</li>
+                    <li>compositor hints for transparency</li>
+                    <li>never grabs focus</li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<section>
+    <div class="wrap">
+        <div class="section-title">screenshots</div>
+        <h2 class="section-heading">Real menu, real game.</h2>
+        <p class="section-sub">All shots below are from Sober on Arch. No mockups.</p>
+        <div class="shot-grid">
+            <div class="shot"><img src="assets/screenshots/menu.png" alt="menu" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'menu screenshot'}))"></div>
+            <div class="shot"><img src="assets/screenshots/aimbot.png" alt="aimbot" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'aimbot screenshot'}))"></div>
+            <div class="shot"><img src="assets/screenshots/esp.png" alt="esp" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'esp screenshot'}))"></div>
+            <div class="shot"><img src="assets/screenshots/scripts.png" alt="scripts" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'scripts screenshot'}))"></div>
+        </div>
+    </div>
+</section>
+
+<div class="compat">
+    <div class="compat-inner">
+        <span>x11</span>
+        <span>wayland</span>
+        <span>hyprland</span>
+        <span>kwin</span>
+        <span>mutter</span>
+        <span>sober</span>
+        <span>roblox</span>
+    </div>
+</div>
+
+<section id="buy" class="cta-band">
+    <div class="wrap">
+        <div class="section-title">get access</div>
+        <h2>Ready when you are.</h2>
+        <p>Keys drop instantly. HWID locked, resettable in the dashboard.</p>
+        <a href="#" class="btn primary" id="buyLink">purchase</a>
+        <a href="https://discord.gg/avy3yEgsn2" target="_blank" rel="noopener" class="btn">join discord</a>
+    </div>
+</section>
+
+<footer>
+    <div class="footer-inner">
+        <div>epries &middot; roblox external for linux</div>
+        <div class="footer-links">
+            <a href="docs/">docs</a>
+            <a href="https://discord.gg/avy3yEgsn2" target="_blank" rel="noopener">discord</a>
+            <a href="#buy">purchase</a>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // Swap the sellauth URL in once, everywhere.
+    var SELLAUTH_URL = "#";
+    document.querySelectorAll('a[href="#buy"], #buyLink').forEach(function(a){
+        if (SELLAUTH_URL !== "#") a.href = SELLAUTH_URL;
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Luau VM API · epries</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="../assets/nyx.png" type="image/png">
+</head>
+<body>
+
+<nav class="nav">
+    <div class="nav-inner">
+        <a href="../" class="brand"><img src="../assets/nyx.png" alt="">epries<span class="dot">.</span></a>
+        <div class="nav-links">
+            <a href="../#features">features</a>
+            <a href="./" class="active">docs</a>
+            <a href="https://discord.gg/avy3yEgsn2" target="_blank" rel="noopener">discord</a>
+            <a href="../#buy" class="nav-cta">get access</a>
+        </div>
+    </div>
+</nav>
+
+<div class="docs-shell">
+
+    <aside class="docs-side">
+        <h4>guide</h4>
+        <ul>
+            <li><a href="./">overview</a></li>
+            <li><a href="installing.html">installing</a></li>
+            <li><a href="luau-api.html" class="active">luau vm api</a></li>
+        </ul>
+
+        <h4>on this page</h4>
+        <ul>
+            <li><a href="#globals">globals</a></li>
+            <li><a href="#task">task</a></li>
+            <li><a href="#typeof">typeof</a></li>
+            <li><a href="#enums">enums</a></li>
+            <li><a href="#value-types">value types</a></li>
+            <li><a href="#instance">instance</a></li>
+            <li><a href="#per-class">per-class fields</a></li>
+            <li><a href="#signals">signals</a></li>
+            <li><a href="#watchers">watchers</a></li>
+            <li><a href="#uis">userinputservice</a></li>
+            <li><a href="#keybinds">keybinds</a></li>
+            <li><a href="#mouse">mouse</a></li>
+            <li><a href="#http">httpservice</a></li>
+            <li><a href="#bindable">bindableevent / function</a></li>
+            <li><a href="#tween">tweenservice</a></li>
+            <li><a href="#windows">windows</a></li>
+            <li><a href="#drawing">drawing</a></li>
+            <li><a href="#raycasting">raycasting</a></li>
+            <li><a href="#hierarchy">class hierarchy</a></li>
+            <li><a href="#log">console log tags</a></li>
+            <li><a href="#not-yet">not yet supported</a></li>
+        </ul>
+    </aside>
+
+    <main class="docs-main">
+        <h1>Luau VM API</h1>
+        <p class="lede">Full reference for every global, type, method, field, and signal exposed to scripts.</p>
+
+        <h2 id="globals">Globals</h2>
+        <table style="width:100%;border-collapse:collapse;font-size:13.5px">
+            <thead>
+                <tr style="text-align:left;border-bottom:1px solid var(--border)">
+                    <th style="padding:8px 10px;color:var(--muted);font-weight:600">Name</th>
+                    <th style="padding:8px 10px;color:var(--muted);font-weight:600">Type</th>
+                    <th style="padding:8px 10px;color:var(--muted);font-weight:600">Purpose</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td style="padding:6px 10px"><code>game</code></td><td style="padding:6px 10px">Instance / nil</td><td style="padding:6px 10px">DataModel root</td></tr>
+                <tr><td style="padding:6px 10px"><code>workspace</code></td><td style="padding:6px 10px">Instance</td><td style="padding:6px 10px">Workspace shortcut</td></tr>
+                <tr><td style="padding:6px 10px"><code>getroot()</code></td><td style="padding:6px 10px">function</td><td style="padding:6px 10px">legacy alias for <code>game</code></td></tr>
+                <tr><td style="padding:6px 10px"><code>print</code>, <code>warn</code></td><td style="padding:6px 10px">function</td><td style="padding:6px 10px">console log override</td></tr>
+                <tr><td style="padding:6px 10px"><code>wait([s])</code></td><td style="padding:6px 10px">function</td><td style="padding:6px 10px">legacy alias for <code>task.wait</code></td></tr>
+                <tr><td style="padding:6px 10px"><code>typeof(x)</code></td><td style="padding:6px 10px">function</td><td style="padding:6px 10px">Roblox-flavored type name</td></tr>
+                <tr><td style="padding:6px 10px"><code>task</code></td><td style="padding:6px 10px">table</td><td style="padding:6px 10px">scheduler API</td></tr>
+                <tr><td style="padding:6px 10px"><code>Vector3</code></td><td style="padding:6px 10px">table</td><td style="padding:6px 10px">ctor + <code>.zero .one .xAxis .yAxis .zAxis</code></td></tr>
+                <tr><td style="padding:6px 10px"><code>Vector2</code></td><td style="padding:6px 10px">table</td><td style="padding:6px 10px">ctor + <code>.zero .one .xAxis .yAxis</code></td></tr>
+                <tr><td style="padding:6px 10px"><code>Ray</code></td><td style="padding:6px 10px">table</td><td style="padding:6px 10px">ctor</td></tr>
+                <tr><td style="padding:6px 10px"><code>Color3</code></td><td style="padding:6px 10px">table</td><td style="padding:6px 10px"><code>.new</code>, <code>.fromRGB</code></td></tr>
+                <tr><td style="padding:6px 10px"><code>CFrame</code></td><td style="padding:6px 10px">table</td><td style="padding:6px 10px"><code>.new</code>, <code>.Angles</code>, <code>.fromEulerAnglesXYZ</code>, <code>.lookAt</code></td></tr>
+                <tr><td style="padding:6px 10px"><code>Instance</code></td><td style="padding:6px 10px">table</td><td style="padding:6px 10px"><code>.new</code> (BindableEvent/Function only)</td></tr>
+                <tr><td style="padding:6px 10px"><code>RaycastParams</code></td><td style="padding:6px 10px">table</td><td style="padding:6px 10px"><code>.new</code></td></tr>
+                <tr><td style="padding:6px 10px"><code>TweenInfo</code></td><td style="padding:6px 10px">table</td><td style="padding:6px 10px"><code>.new</code></td></tr>
+                <tr><td style="padding:6px 10px"><code>Drawing</code></td><td style="padding:6px 10px">table</td><td style="padding:6px 10px"><code>.new(kind)</code>, <code>.clear()</code></td></tr>
+                <tr><td style="padding:6px 10px"><code>Window</code></td><td style="padding:6px 10px">table</td><td style="padding:6px 10px"><code>.new(title | {opts})</code> retained-mode UI</td></tr>
+                <tr><td style="padding:6px 10px"><code>Enum</code></td><td style="padding:6px 10px">table</td><td style="padding:6px 10px">see Enums</td></tr>
+            </tbody>
+        </table>
+
+        <h2 id="task">task</h2>
+        <p><code>task.wait([s])</code>, <code>task.spawn(fn, ...)</code>, <code>task.defer(fn, ...)</code>, <code>task.cancel()</code> (kills all).</p>
+
+        <h2 id="typeof">typeof</h2>
+        <table style="width:100%;border-collapse:collapse;font-size:13.5px">
+            <thead><tr style="text-align:left;border-bottom:1px solid var(--border)">
+                <th style="padding:8px 10px;color:var(--muted);font-weight:600">Value</th>
+                <th style="padding:8px 10px;color:var(--muted);font-weight:600">type(x)</th>
+                <th style="padding:8px 10px;color:var(--muted);font-weight:600">typeof(x)</th>
+            </tr></thead>
+            <tbody>
+                <tr><td style="padding:6px 10px"><code>Vector3.new()</code></td><td style="padding:6px 10px">userdata</td><td style="padding:6px 10px">Vector3</td></tr>
+                <tr><td style="padding:6px 10px"><code>Vector2.new()</code></td><td style="padding:6px 10px">userdata</td><td style="padding:6px 10px">Vector2</td></tr>
+                <tr><td style="padding:6px 10px"><code>CFrame.new()</code></td><td style="padding:6px 10px">userdata</td><td style="padding:6px 10px">CFrame</td></tr>
+                <tr><td style="padding:6px 10px"><code>Color3.new()</code></td><td style="padding:6px 10px">userdata</td><td style="padding:6px 10px">Color3</td></tr>
+                <tr><td style="padding:6px 10px"><code>Ray.new(o,d)</code></td><td style="padding:6px 10px">userdata</td><td style="padding:6px 10px">Ray</td></tr>
+                <tr><td style="padding:6px 10px"><code>Enum.KeyCode.E</code></td><td style="padding:6px 10px">userdata</td><td style="padding:6px 10px">EnumItem</td></tr>
+                <tr><td style="padding:6px 10px">Instance / UIS / Mouse</td><td style="padding:6px 10px">userdata</td><td style="padding:6px 10px">Instance</td></tr>
+                <tr><td style="padding:6px 10px">signal from a <code>:Connect</code>-able slot</td><td style="padding:6px 10px">userdata</td><td style="padding:6px 10px">RBXScriptSignal</td></tr>
+                <tr><td style="padding:6px 10px">connection returned by <code>:Connect</code></td><td style="padding:6px 10px">userdata</td><td style="padding:6px 10px">RBXScriptConnection</td></tr>
+            </tbody>
+        </table>
+
+        <h2 id="enums">Enums</h2>
+        <p>Each <code>Enum.&lt;Type&gt;.&lt;Item&gt;</code> is an EnumItem userdata with <code>.Name</code>, <code>.Value</code>, <code>.EnumType</code>. Equality compares by (value, type_name).</p>
+        <ul>
+            <li><strong>KeyCode</strong>: Unknown, Backspace, Tab, Return, Escape, Space, Quote, Comma, Minus, Period, Slash, Zero..Nine, Semicolon, Equals, A..Z, LeftBracket, Backslash, RightBracket, F1..F12, arrows, Insert, Home, End, PageUp, PageDown, Left/Right modifier variants.</li>
+            <li><strong>UserInputType</strong>: MouseButton1..3, MouseWheel, MouseMovement, Touch, Keyboard, Focus, Accelerometer, Gyro, Gamepad1..8, TextInput, InputMethod, None.</li>
+            <li><strong>HumanoidStateType</strong>: FallingDown, Running, RunningNoPhysics, Climbing, StrafingNoPhysics, Ragdoll, GettingUp, Jumping, Landed, Flying, Freefall, Seated, PlatformStanding, Dead, Swimming, Physics, None.</li>
+            <li><strong>CameraType</strong>: Fixed, Attach, Watch, Track, Follow, Custom, Scriptable, Orbital.</li>
+            <li><strong>Material</strong>: Plastic, SmoothPlastic, Neon, Wood, WoodPlanks, Marble, Granite, Slate, Concrete, CorrodedMetal, DiamondPlate, Foil, Metal, Grass, Sand, Fabric, Snow, Mud, Ground, Asphalt, Cobblestone, Ice, Water, Rock, Glacier, Sandstone, Basalt, CrackedLava, Limestone, Pavement, Brick, Pebble, Air, LeafyGrass, Salt.</li>
+            <li><strong>NormalId</strong>: Right, Top, Back, Left, Bottom, Front.</li>
+            <li><strong>RaycastFilterType</strong>: Include, Exclude, Whitelist, Blacklist.</li>
+            <li><strong>EasingStyle</strong>: Linear, Sine, Back, Quad, Quart, Quint, Bounce, Elastic, Cubic, Circular, Exponential.</li>
+            <li><strong>EasingDirection</strong>: In, Out, InOut.</li>
+            <li><strong>Font</strong>: UI, System, Plex, Monospace (used by <code>Drawing.Text.Font</code>).</li>
+        </ul>
+
+        <h2 id="value-types">Value types</h2>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead><tr style="text-align:left;border-bottom:1px solid var(--border)">
+                <th style="padding:8px 10px;color:var(--muted);font-weight:600">Type</th>
+                <th style="padding:8px 10px;color:var(--muted);font-weight:600">Fields</th>
+                <th style="padding:8px 10px;color:var(--muted);font-weight:600">Methods</th>
+                <th style="padding:8px 10px;color:var(--muted);font-weight:600">Operators</th>
+            </tr></thead>
+            <tbody>
+                <tr><td style="padding:6px 10px">Vector3</td><td style="padding:6px 10px">X, Y, Z, Magnitude, Unit</td><td style="padding:6px 10px">:Dot, :Cross, :Lerp</td><td style="padding:6px 10px"><code>+ - -unary * / == tostring</code></td></tr>
+                <tr><td style="padding:6px 10px">Vector2</td><td style="padding:6px 10px">X, Y, Magnitude, Unit</td><td style="padding:6px 10px">:Dot, :Cross (scalar), :Lerp</td><td style="padding:6px 10px">same as Vector3</td></tr>
+                <tr><td style="padding:6px 10px">Ray</td><td style="padding:6px 10px">Origin, Direction, Unit</td><td style="padding:6px 10px"></td><td style="padding:6px 10px"></td></tr>
+                <tr><td style="padding:6px 10px">Color3</td><td style="padding:6px 10px">R, G, B</td><td style="padding:6px 10px">:Lerp</td><td style="padding:6px 10px"><code>== tostring</code></td></tr>
+                <tr><td style="padding:6px 10px">CFrame</td><td style="padding:6px 10px">X, Y, Z, Position, RightVector, UpVector, LookVector</td><td style="padding:6px 10px">:Inverse, :ToWorldSpace, :ToObjectSpace, :PointToWorldSpace, :PointToObjectSpace, :VectorToWorldSpace, :VectorToObjectSpace, :GetComponents</td><td style="padding:6px 10px"><code>CF*CF, CF*V3, CF+V3, CF-V3, ==</code></td></tr>
+            </tbody>
+        </table>
+        <p>CFrame constructors: <code>CFrame.new()</code>, <code>CFrame.new(x,y,z)</code>, <code>CFrame.new(v3)</code>, <code>CFrame.new(x,y,z, r00..r22)</code>, <code>CFrame.Angles(rx,ry,rz)</code>, <code>CFrame.fromEulerAnglesXYZ(rx,ry,rz)</code>, <code>CFrame.lookAt(from, to, up?)</code>.</p>
+
+        <h2 id="instance">Instance</h2>
+        <p><strong>Base fields:</strong> <code>Name</code>, <code>ClassName</code>, <code>Parent</code>.</p>
+        <p><strong>Base signals (on every Instance):</strong> <code>.ChildAdded(child)</code>, <code>.ChildRemoved(child)</code>.</p>
+
+        <h3>Methods (all Instances)</h3>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <tbody>
+                <tr><td style="padding:6px 10px"><code>:GetChildren()</code></td><td style="padding:6px 10px">live children vector</td></tr>
+                <tr><td style="padding:6px 10px"><code>:GetDescendants()</code></td><td style="padding:6px 10px">DFS whole subtree, cap 65536</td></tr>
+                <tr><td style="padding:6px 10px"><code>:FindFirstChild(name)</code></td><td style="padding:6px 10px">first Name match</td></tr>
+                <tr><td style="padding:6px 10px"><code>:FindFirstChildOfClass(cls)</code></td><td style="padding:6px 10px">first ClassName match</td></tr>
+                <tr><td style="padding:6px 10px"><code>:WaitForChild(name, timeout?)</code></td><td style="padding:6px 10px">yield-poll every 50ms, warns after 5s if no timeout</td></tr>
+                <tr><td style="padding:6px 10px"><code>:GetFullName()</code></td><td style="padding:6px 10px">Parent chain joined with <code>.</code>, up to 64 hops</td></tr>
+                <tr><td style="padding:6px 10px"><code>:IsA(class)</code></td><td style="padding:6px 10px">walks the class hierarchy</td></tr>
+                <tr><td style="padding:6px 10px"><code>:GetService(cls)</code> / <code>:service(cls)</code></td><td style="padding:6px 10px">cached child-by-class lookup, intercepts UIS and HttpService</td></tr>
+                <tr><td style="padding:6px 10px"><code>:GetPropertyChangedSignal(prop)</code></td><td style="padding:6px 10px">Signal that fires when the property changes (poll-based)</td></tr>
+                <tr><td style="padding:6px 10px"><code>:GetAttribute(name)</code></td><td style="padding:6px 10px">returns nil <span class="tag warn">stub</span></td></tr>
+                <tr><td style="padding:6px 10px"><code>:GetAttributes()</code></td><td style="padding:6px 10px">returns empty table <span class="tag warn">stub</span></td></tr>
+                <tr><td style="padding:6px 10px"><code>:SetAttribute(name, val)</code></td><td style="padding:6px 10px">raises <span class="tag no">no</span></td></tr>
+                <tr><td style="padding:6px 10px"><code>:Raycast(o, d, params?)</code></td><td style="padding:6px 10px">Workspace only, see Raycasting</td></tr>
+                <tr><td style="padding:6px 10px"><code>:GetMouse()</code></td><td style="padding:6px 10px">Player only, returns Mouse userdata</td></tr>
+                <tr><td style="padding:6px 10px"><code>:IsClient()</code> / <code>:IsServer()</code> / <code>:IsStudio()</code></td><td style="padding:6px 10px">RunService only, always client=true, server/studio=false</td></tr>
+                <tr><td style="padding:6px 10px"><code>:BindToRenderStep(name, priority, fn)</code></td><td style="padding:6px 10px">routes to RenderStepped, priority ignored</td></tr>
+                <tr><td style="padding:6px 10px"><code>:UnbindFromRenderStep(name)</code></td><td style="padding:6px 10px">disconnects the named bind</td></tr>
+                <tr><td style="padding:6px 10px"><code>:WorldToViewportPoint(v3)</code></td><td style="padding:6px 10px">Camera, returns <code>(Vector3(sx, sy, depth), onScreen)</code></td></tr>
+                <tr><td style="padding:6px 10px"><code>:WorldToScreenPoint(v3)</code></td><td style="padding:6px 10px">Camera, identical to WorldToViewportPoint</td></tr>
+                <tr><td style="padding:6px 10px"><code>:ViewportPointToRay(x, y, depth?)</code></td><td style="padding:6px 10px">Camera, Ray from camera through screen point, 1000 studs long</td></tr>
+                <tr><td style="padding:6px 10px"><code>:GetRenderCFrame()</code></td><td style="padding:6px 10px">Camera, current CFrame</td></tr>
+                <tr><td style="padding:6px 10px"><code>:GetPartBoundsInRadius(v3, r, params?)</code></td><td style="padding:6px 10px">Workspace, parts whose OOBB touches the sphere</td></tr>
+                <tr><td style="padding:6px 10px"><code>:GetPartBoundsInBox(cf, size, params?)</code></td><td style="padding:6px 10px">Workspace, parts whose bounding sphere is inside the OBB</td></tr>
+                <tr><td style="padding:6px 10px"><code>:GetPartsInPart(part, params?)</code></td><td style="padding:6px 10px">Workspace, parts touching the query part's bounds</td></tr>
+                <tr><td style="padding:6px 10px"><code>:LineOfSight(fromV3, toV3, params?)</code></td><td style="padding:6px 10px">Workspace, true if segment is unobstructed. <code>IsLineOfSightClear</code> alias.</td></tr>
+                <tr><td style="padding:6px 10px"><code>:Destroy()</code> / <code>:Remove()</code></td><td style="padding:6px 10px">raises <span class="tag no">no</span></td></tr>
+            </tbody>
+        </table>
+
+        <p><strong>Metamethods:</strong> <code>__index</code> (5-layer), <code>__newindex</code>, <code>__tostring</code> gives <code>"Class: 0xADDR"</code>, <code>__eq</code> compares address, <code>__metatable</code> is locked.</p>
+        <p><strong>Lookup order:</strong> base fields, per-class fields, methods table, child-by-name, nil.</p>
+
+        <h2 id="per-class">Per-class fields</h2>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead><tr style="text-align:left;border-bottom:1px solid var(--border)">
+                <th style="padding:8px 10px;color:var(--muted);font-weight:600">Class</th>
+                <th style="padding:8px 10px;color:var(--muted);font-weight:600">Read-only</th>
+                <th style="padding:8px 10px;color:var(--muted);font-weight:600">Read-write</th>
+            </tr></thead>
+            <tbody>
+                <tr><td style="padding:6px 10px">BasePart</td><td style="padding:6px 10px"></td><td style="padding:6px 10px">Position, CFrame, Size, Velocity/AssemblyLinearVelocity, RotVelocity/AssemblyAngularVelocity, Anchored, CanCollide, Transparency, Reflectance, Locked, CastShadow, Color</td></tr>
+                <tr><td style="padding:6px 10px">Humanoid</td><td style="padding:6px 10px">SeatPart, Died (Signal), HealthChanged (Signal)</td><td style="padding:6px 10px">Health, MaxHealth, WalkSpeed, JumpPower, JumpHeight, HipHeight, Sit, PlatformStand, MoveVelocity, CameraOffset</td></tr>
+                <tr><td style="padding:6px 10px">Camera</td><td style="padding:6px 10px">Position, CameraSubject, ViewportSize</td><td style="padding:6px 10px">FieldOfView (rbx-encrypted), CFrame</td></tr>
+                <tr><td style="padding:6px 10px">Lighting</td><td style="padding:6px 10px"></td><td style="padding:6px 10px">Brightness, ClockTime, FogStart, FogEnd, ExposureCompensation, ShadowSoftness, Ambient, FogColor</td></tr>
+                <tr><td style="padding:6px 10px">Player</td><td style="padding:6px 10px">UserId, DisplayName, Character, Team, AccountAge, CharacterAdded (Signal), CharacterRemoving (Signal)</td><td style="padding:6px 10px"></td></tr>
+                <tr><td style="padding:6px 10px">Players</td><td style="padding:6px 10px">LocalPlayer, PlayerAdded (Signal), PlayerRemoving (Signal)</td><td style="padding:6px 10px"></td></tr>
+                <tr><td style="padding:6px 10px">RunService</td><td style="padding:6px 10px">Heartbeat (Signal), RenderStepped (Signal), Stepped (aliased to Heartbeat)</td><td style="padding:6px 10px"></td></tr>
+                <tr><td style="padding:6px 10px">Workspace</td><td style="padding:6px 10px">CurrentCamera</td><td style="padding:6px 10px">Gravity</td></tr>
+                <tr><td style="padding:6px 10px">ProximityPrompt</td><td style="padding:6px 10px">KeyboardKeyCode, ActionText, ObjectText</td><td style="padding:6px 10px">Enabled, RequiresLineOfSight, HoldDuration, MaxActivationDistance</td></tr>
+                <tr><td style="padding:6px 10px">ObjectValue</td><td style="padding:6px 10px"></td><td style="padding:6px 10px">Value (Instance / nil)</td></tr>
+                <tr><td style="padding:6px 10px">StringValue</td><td style="padding:6px 10px">Value (string)</td><td style="padding:6px 10px"></td></tr>
+                <tr><td style="padding:6px 10px">NumberValue</td><td style="padding:6px 10px"></td><td style="padding:6px 10px">Value (double)</td></tr>
+                <tr><td style="padding:6px 10px">IntValue</td><td style="padding:6px 10px"></td><td style="padding:6px 10px">Value (int32)</td></tr>
+                <tr><td style="padding:6px 10px">BoolValue</td><td style="padding:6px 10px"></td><td style="padding:6px 10px">Value (bool)</td></tr>
+                <tr><td style="padding:6px 10px">CFrameValue</td><td style="padding:6px 10px"></td><td style="padding:6px 10px">Value (CFrame)</td></tr>
+                <tr><td style="padding:6px 10px">Vector3Value</td><td style="padding:6px 10px"></td><td style="padding:6px 10px">Value (Vector3)</td></tr>
+                <tr><td style="padding:6px 10px">Color3Value</td><td style="padding:6px 10px"></td><td style="padding:6px 10px">Value (Color3)</td></tr>
+            </tbody>
+        </table>
+
+        <h2 id="signals">Signals</h2>
+        <p><code>Signal:Connect(fn)</code> or <code>:connect(fn)</code> or <code>:Once(fn)</code> returns a Connection.</p>
+        <p><code>Signal:Wait([timeout])</code> yields the calling coroutine until the signal fires. Returns the fire's arguments, or nil if the timeout hits first.</p>
+        <p><code>Connection:Disconnect()</code> / <code>:disconnect()</code>, <code>.Connected</code> is a boolean.</p>
+        <p>Handlers run in their own coroutine each fire, so <code>task.wait</code>, <code>:WaitForChild</code>, and other yielding calls work inside a Connect callback. Handler errors print <code>[error] &lt;msg&gt;</code> to the console. Other handlers still fire.</p>
+
+        <h2 id="watchers">Watchers</h2>
+        <p>Change-detection signals are poll-based each engine tick:</p>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead><tr style="text-align:left;border-bottom:1px solid var(--border)">
+                <th style="padding:8px 10px;color:var(--muted);font-weight:600">Signal</th>
+                <th style="padding:8px 10px;color:var(--muted);font-weight:600">Diff key</th>
+                <th style="padding:8px 10px;color:var(--muted);font-weight:600">Fires with</th>
+            </tr></thead>
+            <tbody>
+                <tr><td style="padding:6px 10px">Heartbeat / RenderStepped</td><td style="padding:6px 10px">every frame</td><td style="padding:6px 10px">dt (seconds)</td></tr>
+                <tr><td style="padding:6px 10px">PlayerAdded / Removing</td><td style="padding:6px 10px">Players service children set</td><td style="padding:6px 10px">Player instance</td></tr>
+                <tr><td style="padding:6px 10px">CharacterAdded / Removing</td><td style="padding:6px 10px">Player::Character pointer</td><td style="padding:6px 10px">Character model</td></tr>
+                <tr><td style="padding:6px 10px">ChildAdded / Removed</td><td style="padding:6px 10px">children set of watched Instance</td><td style="padding:6px 10px">child Instance</td></tr>
+                <tr><td style="padding:6px 10px">HealthChanged</td><td style="padding:6px 10px">Humanoid::Health</td><td style="padding:6px 10px">new health</td></tr>
+                <tr><td style="padding:6px 10px">Died</td><td style="padding:6px 10px">Health crossing above to at-or-below zero</td><td style="padding:6px 10px">no args</td></tr>
+                <tr><td style="padding:6px 10px">GetPropertyChangedSignal(prop)</td><td style="padding:6px 10px"><code>luaL_tolstring</code> snapshot</td><td style="padding:6px 10px">no args</td></tr>
+            </tbody>
+        </table>
+        <p>Watchers register on the first <code>:Connect</code> and then run every tick.</p>
+
+        <h2 id="uis">UserInputService</h2>
+        <p>Access via <code>game:GetService("UserInputService")</code>.</p>
+        <p><strong>Methods:</strong> <code>:IsKeyDown(kc)</code>, <code>:IsMouseButtonPressed(b)</code>, <code>:GetMouseLocation()</code> returns Vector2.</p>
+        <p><strong>Signals:</strong> <code>.InputBegan(io, gp)</code>, <code>.InputEnded(io, gp)</code>, <code>.InputChanged</code> (reserved), <code>.MouseButton1Down/Up</code>, <code>.MouseButton2Down/Up</code>.</p>
+        <p><strong>inputObject:</strong> <code>{ UserInputType, KeyCode = {Value, Name, EnumType}, Position = Vector3(mx, my, 0), Delta = Vector3(0, 0, 0) }</code>.</p>
+
+        <h2 id="keybinds">Keybinds</h2>
+        <p>Thin wrappers around the input pipeline. Skip hand-rolling an InputBegan handler for simple hotkeys.</p>
+        <p><code>keybind(key, fn [, mode])</code> binds a single key. <code>key</code> can be a string name (<code>"F"</code>, <code>"LeftShift"</code>, case-insensitive for letters), an <code>Enum.KeyCode.X</code>, or a raw numeric code. <code>mode</code> is <code>"down"</code> (default), <code>"up"</code>, or <code>"both"</code>. The callback gets one bool argument (true=pressed, false=released). Returns a handle with <code>:Disconnect()</code>.</p>
+        <p><code>keybind_combo(keys, fn [, mode])</code> is a chord binding. <code>keys</code> is a list; the last key is the trigger and every earlier key must be held when it fires.</p>
+        <pre><code>local hk = keybind("F", function(down)
+    print("F is now", down and "down" or "up")
+end, "both")
+
+keybind_combo({Enum.KeyCode.LeftShift, "R"}, function()
+    print("Shift+R pressed")
+end)
+
+hk:Disconnect()</code></pre>
+        <p>Bindings are cleared automatically when the VM stops or reloads.</p>
+
+        <h2 id="mouse">Mouse</h2>
+        <p>Access via <code>LocalPlayer:GetMouse()</code>.</p>
+        <p><strong>Fields:</strong> <code>.X</code>, <code>.Y</code> (X11 root coords), <code>.Hit</code> (CFrame at pointer target, camera raycast 5000 studs, identity rotation), <code>.Target</code> (Instance under pointer, nil if nothing).</p>
+        <p><strong>Signals:</strong> <code>.Move</code>, <code>.Button1Down</code>, <code>.Button1Up</code>, <code>.Button2Down</code>, <code>.Button2Up</code>.</p>
+        <p><code>.Hit</code> and <code>.Target</code> reuse <code>workspace:Raycast</code>, so they share the OOBB limits. MeshPart triangles and Terrain will not register.</p>
+
+        <h2 id="http">HttpService</h2>
+        <p>Access via <code>game:GetService("HttpService")</code>. Runs outside Roblox's sandbox, so <code>HttpEnabled</code> does not apply.</p>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <tbody>
+                <tr><td style="padding:6px 10px"><code>:GetAsync(url)</code></td><td style="padding:6px 10px">Blocking GET, returns the body string</td></tr>
+                <tr><td style="padding:6px 10px"><code>:PostAsync(url, body, ct?)</code></td><td style="padding:6px 10px">Blocking POST, default content-type <code>application/json</code></td></tr>
+                <tr><td style="padding:6px 10px"><code>:JSONEncode(t)</code></td><td style="padding:6px 10px">Table to JSON string</td></tr>
+                <tr><td style="padding:6px 10px"><code>:JSONDecode(s)</code></td><td style="padding:6px 10px">JSON to table, raises on parse error</td></tr>
+                <tr><td style="padding:6px 10px"><code>:GenerateGUID(wrap?)</code></td><td style="padding:6px 10px">GUID string, <code>wrap=false</code> drops braces</td></tr>
+            </tbody>
+        </table>
+        <p>Blocks the render thread until each request finishes. libcurl timeout is 15 seconds.</p>
+
+        <h2 id="bindable">BindableEvent / BindableFunction</h2>
+        <p><code>Instance.new("BindableEvent")</code> and <code>Instance.new("BindableFunction")</code> both work.</p>
+        <p><strong>BindableEvent</strong>: <code>.Event</code> (Signal), <code>:Fire(...)</code> invokes every connected handler and resumes every waiter, <code>:Destroy()</code> is a no-op.</p>
+        <pre><code>local be = Instance.new("BindableEvent")
+be.Event:Connect(function(a, b) print("got:", a, b) end)
+be:Fire("hello", 42)</code></pre>
+        <p><strong>BindableFunction</strong>: <code>.OnInvoke</code> (assign a function), <code>:Invoke(...)</code> calls it synchronously and returns its return values.</p>
+        <pre><code>local bf = Instance.new("BindableFunction")
+bf.OnInvoke = function(a, b) return a + b end
+print(bf:Invoke(3, 4))  -- 7</code></pre>
+
+        <h2 id="tween">TweenService</h2>
+        <p><code>game:GetService("TweenService"):Create(instance, TweenInfo.new(...), {prop = target})</code> returns a Tween. It runs on the tick pump and writes back to the instance every frame.</p>
+        <pre><code>local Tween = game:GetService("TweenService")
+local part  = workspace.SomePart
+local info  = TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+local tw    = Tween:Create(part, info, {
+    CFrame       = part.CFrame * CFrame.new(0, 10, 0),
+    Transparency = 1,
+    Color        = Color3.fromRGB(255, 0, 0),
+})
+tw.Completed:Connect(function(state) print("done:", state) end)
+tw:Play()</code></pre>
+        <p><strong>TweenInfo.new(time, easingStyle?, easingDirection?, repeatCount?, reverses?, delayTime?)</strong>. Defaults match Roblox: <code>time=1, Quad, Out, 0, false, 0</code>. Style and direction accept Enum items or raw ints.</p>
+        <p><strong>Tween</strong>: <code>:Play</code>, <code>:Cancel</code>, <code>:Pause</code>. <code>.Completed</code> Signal, <code>.PlaybackState</code> string.</p>
+        <p><strong>Supported property kinds:</strong> number, Vector2, Vector3, Color3, CFrame. CFrame lerps component-wise (position accurate, rotation close for small deltas). Unsupported kinds are silently ignored at Create time.</p>
+        <p><strong>Easing styles:</strong> Linear, Sine, Quad, Cubic, Quart, Quint, Back, Circular, Exponential. Each with In / Out / InOut.</p>
+
+        <h2 id="windows">Windows</h2>
+        <p><code>Window.new(titleOrTable)</code> returns a movable, resizable ImGui window backed by a persistent Lua object. Widgets stay alive until <code>:Remove()</code>. Callbacks run in coroutines, so yielding calls work inside them.</p>
+        <pre><code>local win = Window.new({
+    Title    = "My Menu",
+    Position = Vector2.new(120, 120),
+    Size     = Vector2.new(320, 400),
+})
+
+win:Label("Aimbot")
+win:Toggle("Enabled", false, function(on) print("aim:", on) end)
+win:Slider("FOV", 10, 500, 150, function(v) print("fov:", v) end)
+win:Combo("Target part", {"Head","Torso","Feet"}, function(idx, name)
+    print("target:", name)
+end)
+win:Separator()
+win:TextInput("Name", "player123", function(s) print("name:", s) end)
+win:Button("Reset", function() print("reset!") end)
+win:Image("/home/yeto/Pictures/icon.png", Vector2.new(64, 64))</code></pre>
+
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <tbody>
+                <tr><td style="padding:6px 10px"><code>:Button(text, cb?)</code></td><td style="padding:6px 10px">cb() on click</td></tr>
+                <tr><td style="padding:6px 10px"><code>:Slider(text, min, max, default?, cb?)</code></td><td style="padding:6px 10px">cb(value) on drag</td></tr>
+                <tr><td style="padding:6px 10px"><code>:Toggle(text, default?, cb?)</code> / <code>:Checkbox</code></td><td style="padding:6px 10px">cb(state) on click</td></tr>
+                <tr><td style="padding:6px 10px"><code>:Label(text)</code> / <code>:Text</code></td><td style="padding:6px 10px">plain text</td></tr>
+                <tr><td style="padding:6px 10px"><code>:TextInput(text, default?, cb?)</code> / <code>:Input</code></td><td style="padding:6px 10px">cb(string) on Enter</td></tr>
+                <tr><td style="padding:6px 10px"><code>:Combo(text, items[], cb?)</code> / <code>:Dropdown</code></td><td style="padding:6px 10px">cb(index, name) on selection</td></tr>
+                <tr><td style="padding:6px 10px"><code>:Separator()</code></td><td style="padding:6px 10px">horizontal rule</td></tr>
+                <tr><td style="padding:6px 10px"><code>:SameLine()</code></td><td style="padding:6px 10px">keep next widget on the same row</td></tr>
+                <tr><td style="padding:6px 10px"><code>:Image(path, size?)</code></td><td style="padding:6px 10px">loads PNG or JPEG from disk, size is Vector2</td></tr>
+            </tbody>
+        </table>
+
+        <p><strong>Widget properties:</strong> <code>.Text</code> / <code>.Label</code> (mutable), <code>.Value</code> (number for Slider, bool for Toggle, string for TextInput, 1-based index for Combo), <code>:Remove()</code> / <code>:Destroy()</code>.</p>
+        <p><strong>Window properties:</strong> <code>.Title</code>, <code>.Visible</code>, <code>.Position</code>, <code>.Size</code>, <code>:Remove()</code>. Users can drag and resize; changes flow back into <code>.Position</code> and <code>.Size</code>.</p>
+
+        <h2 id="drawing">Drawing</h2>
+        <p><code>Drawing.new(kind)</code> returns an object that blits onto ImGui's foreground draw list every frame. Screen coords, over everything, no game overlay interaction.</p>
+        <p><strong>Kinds:</strong> <code>"Line"</code>, <code>"Square"</code>, <code>"Circle"</code>, <code>"Text"</code>, <code>"Triangle"</code>, <code>"Quad"</code>, <code>"Image"</code>.</p>
+        <p><strong>Common properties:</strong> <code>Visible</code> (default false), <code>ZIndex</code>, <code>Color</code>, <code>Transparency</code> (0 = fully transparent, 1 = opaque, exploit convention), <code>Thickness</code>, <code>Filled</code>. Methods: <code>:Remove()</code> / <code>:Destroy()</code>.</p>
+
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead><tr style="text-align:left;border-bottom:1px solid var(--border)">
+                <th style="padding:8px 10px;color:var(--muted);font-weight:600">Kind</th>
+                <th style="padding:8px 10px;color:var(--muted);font-weight:600">Properties</th>
+            </tr></thead>
+            <tbody>
+                <tr><td style="padding:6px 10px">Line</td><td style="padding:6px 10px">From, To (Vector2), Thickness</td></tr>
+                <tr><td style="padding:6px 10px">Square</td><td style="padding:6px 10px">Position (top-left), Size, Rounding, Filled, Thickness</td></tr>
+                <tr><td style="padding:6px 10px">Circle</td><td style="padding:6px 10px">Position (center), Radius, NumSides, Rotation, Filled, Thickness</td></tr>
+                <tr><td style="padding:6px 10px">Text</td><td style="padding:6px 10px">Position, Text, Size, Font, Center, Outline, OutlineColor, TextBounds (read-only)</td></tr>
+                <tr><td style="padding:6px 10px">Triangle</td><td style="padding:6px 10px">PointA, PointB, PointC, Filled, Thickness</td></tr>
+                <tr><td style="padding:6px 10px">Quad</td><td style="padding:6px 10px">PointA, PointB, PointC, PointD, Filled, Thickness</td></tr>
+                <tr><td style="padding:6px 10px">Image</td><td style="padding:6px 10px">Position, Size, Data (file path), Rounding, Rotation, ImageSize (read-only), Loaded (read-only)</td></tr>
+            </tbody>
+        </table>
+
+        <pre><code>local dot = Drawing.new("Circle")
+dot.Position = Vector2.new(400, 300)
+dot.Radius   = 6
+dot.Color    = Color3.fromRGB(255, 100, 100)
+dot.Filled   = true
+dot.Visible  = true
+
+local label = Drawing.new("Text")
+label.Position     = Vector2.new(400, 320)
+label.Text         = "hello"
+label.Center       = true
+label.Outline      = true
+label.Color        = Color3.fromRGB(255, 255, 255)
+label.OutlineColor = Color3.fromRGB(0, 0, 0)
+label.Visible      = true
+
+Drawing.clear()  -- remove all</code></pre>
+        <p>Screen coords are the same as UIS <code>:GetMouseLocation()</code>, i.e. X11 root coords.</p>
+
+        <h2 id="raycasting">Raycasting</h2>
+        <p><code>workspace:Raycast(originV3, directionV3, params?)</code> returns a RaycastResult or nil.</p>
+        <p><strong>RaycastParams</strong> is a plain table from <code>RaycastParams.new()</code>: <code>FilterDescendantsInstances</code> (Instance[]), <code>FilterType</code> (<code>"Include"</code> / <code>"Exclude"</code> or Enum), <code>IgnoreWater</code> (accepted, not enforced).</p>
+        <p><strong>RaycastResult</strong> is a plain table: <code>Position</code>, <code>Normal</code>, <code>Distance</code>, <code>Instance</code>, <code>Material</code> (placeholder <code>"Enum.Material.Plastic"</code>).</p>
+        <p><strong>Limits:</strong> OOBB approximation, walks up to 8192 BaseParts, no CollisionGroup, no MeshPart triangles, no Terrain voxels.</p>
+
+        <h2 id="hierarchy">Class hierarchy (for IsA)</h2>
+        <pre><code>Instance
+├── PVInstance
+│   ├── Model ── Workspace
+│   └── BasePart ── Part / MeshPart / WedgePart / CornerWedgePart /
+│                   TrussPart / SpawnLocation / Seat / VehicleSeat /
+│                   UnionOperation / NegateOperation / Terrain
+├── Humanoid
+├── Camera
+├── Lighting
+├── Player
+├── Players
+└── RunService</code></pre>
+
+        <h2 id="log">Console log tags</h2>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <tbody>
+                <tr><td style="padding:6px 10px"><code>[error]</code></td><td style="padding:6px 10px">red, <code>lua_pcall</code> runtime error</td></tr>
+                <tr><td style="padding:6px 10px"><code>[load]</code></td><td style="padding:6px 10px">red, <code>luau_load</code> failure</td></tr>
+                <tr><td style="padding:6px 10px"><code>[warn]</code></td><td style="padding:6px 10px">amber, user <code>warn(...)</code> call</td></tr>
+                <tr><td style="padding:6px 10px"><code>[signal]</code></td><td style="padding:6px 10px">red, signal handler pcall error</td></tr>
+                <tr><td style="padding:6px 10px"><code>[LuauVM]</code></td><td style="padding:6px 10px">soft blue, engine internals (ready, reloaded)</td></tr>
+                <tr><td style="padding:6px 10px"><em>none</em></td><td style="padding:6px 10px">off-white, user <code>print(...)</code></td></tr>
+            </tbody>
+        </table>
+
+        <h2 id="not-yet">Not yet supported</h2>
+        <ul>
+            <li><code>Instance.new(cls)</code> for classes other than BindableEvent and BindableFunction</li>
+            <li><code>:Destroy()</code> / <code>:Remove()</code>, writing <code>.Parent</code></li>
+            <li><code>Humanoid.StateChanged</code></li>
+            <li>Real <code>RaycastResult.Material</code></li>
+            <li>Async HTTP (yield until response instead of blocking)</li>
+            <li><code>Value.Changed</code> signal (use <code>GetPropertyChangedSignal("Value")</code> for now)</li>
+            <li>StringValue write</li>
+            <li>StarterGui:SetCore, ReplicatedStorage fields</li>
+        </ul>
+
+    </main>
+
+</div>
+
+<footer>
+    <div class="footer-inner">
+        <div>epries · roblox external for linux</div>
+        <div class="footer-links">
+            <a href="../">home</a>
+            <a href="https://discord.gg/avy3yEgsn2" target="_blank" rel="noopener">discord</a>
+            <a href="../#buy">purchase</a>
+        </div>
+    </div>
+</footer>
+
+<script src="../assets/js/copy.js"></script>
+</body>
+</html>

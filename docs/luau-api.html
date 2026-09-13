@@ -247,13 +247,31 @@
         <h2 id="uis">UserInputService</h2>
         <p>Access via <code>game:GetService("UserInputService")</code>.</p>
         <p><strong>Methods:</strong> <code>:IsKeyDown(kc)</code>, <code>:IsMouseButtonPressed(b)</code>, <code>:GetMouseLocation()</code> returns Vector2.</p>
-        <p><strong>Signals:</strong> <code>.InputBegan(io, gp)</code>, <code>.InputEnded(io, gp)</code>, <code>.InputChanged</code> (reserved), <code>.MouseButton1Down/Up</code>, <code>.MouseButton2Down/Up</code>.</p>
+        <p><strong>Signals:</strong> <code>.InputBegan(io, gp)</code>, <code>.InputEnded(io, gp)</code>, <code>.InputChanged</code> (reserved), <code>.MouseButton1Down/Up</code> (LMB), <code>.MouseButton2Down/Up</code> (RMB), <code>.MouseButton3Down/Up</code> (MMB), <code>.Mouse4Down/Up</code> (side back), <code>.Mouse5Down/Up</code> (side forward).</p>
         <p><strong>inputObject:</strong> <code>{ UserInputType, KeyCode = {Value, Name, EnumType}, Position = Vector3(mx, my, 0), Delta = Vector3(0, 0, 0) }</code>.</p>
 
         <h2 id="keybinds">Keybinds</h2>
         <p>Thin wrappers around the input pipeline. Skip hand-rolling an InputBegan handler for simple hotkeys.</p>
-        <p><code>keybind(key, fn [, mode])</code> binds a single key. <code>key</code> can be a string name (<code>"F"</code>, <code>"LeftShift"</code>, case-insensitive for letters), an <code>Enum.KeyCode.X</code>, or a raw numeric code. <code>mode</code> is <code>"down"</code> (default), <code>"up"</code>, or <code>"both"</code>. The callback gets one bool argument (true=pressed, false=released). Returns a handle with <code>:Disconnect()</code>.</p>
+        <p><code>keybind(key, fn [, mode])</code> binds a single key or mouse button. <code>key</code> can be a string name (<code>"F"</code>, <code>"LeftShift"</code>, case-insensitive for letters), an <code>Enum.KeyCode.X</code>, or a raw numeric code. <code>mode</code> is <code>"down"</code> (default), <code>"up"</code>, or <code>"both"</code>. The callback gets one bool argument (true=pressed, false=released). Returns a handle with <code>:Disconnect()</code>.</p>
         <p><code>keybind_combo(keys, fn [, mode])</code> is a chord binding. <code>keys</code> is a list; the last key is the trigger and every earlier key must be held when it fires.</p>
+
+        <h3>Mouse button names</h3>
+        <p>Mouse buttons are bindable through <code>keybind()</code> the same way as keys. Any of these strings work (case-insensitive):</p>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead><tr style="text-align:left;border-bottom:1px solid var(--border)">
+                <th style="padding:8px 10px;color:var(--muted);font-weight:600">Physical button</th>
+                <th style="padding:8px 10px;color:var(--muted);font-weight:600">Accepted names</th>
+            </tr></thead>
+            <tbody>
+                <tr><td style="padding:6px 10px">Left</td><td style="padding:6px 10px"><code>"LMB"</code>, <code>"M1"</code>, <code>"MB1"</code>, <code>"MouseButton1"</code></td></tr>
+                <tr><td style="padding:6px 10px">Right</td><td style="padding:6px 10px"><code>"RMB"</code>, <code>"M2"</code>, <code>"MB2"</code>, <code>"MouseButton2"</code></td></tr>
+                <tr><td style="padding:6px 10px">Middle</td><td style="padding:6px 10px"><code>"MMB"</code>, <code>"M3"</code>, <code>"MB3"</code>, <code>"MouseButton3"</code></td></tr>
+                <tr><td style="padding:6px 10px">Side back (Mouse4)</td><td style="padding:6px 10px"><code>"Mouse4"</code>, <code>"M4"</code>, <code>"MB4"</code>, <code>"MouseButton4"</code>, <code>"MouseBack"</code></td></tr>
+                <tr><td style="padding:6px 10px">Side forward (Mouse5)</td><td style="padding:6px 10px"><code>"Mouse5"</code>, <code>"M5"</code>, <code>"MB5"</code>, <code>"MouseButton5"</code>, <code>"MouseForward"</code></td></tr>
+            </tbody>
+        </table>
+        <p>Side buttons are wired through XInput2 raw events, so they work regardless of pointer position or window focus.</p>
+
         <pre><code>local hk = keybind("F", function(down)
     print("F is now", down and "down" or "up")
 end, "both")
@@ -262,13 +280,17 @@ keybind_combo({Enum.KeyCode.LeftShift, "R"}, function()
     print("Shift+R pressed")
 end)
 
+keybind("Mouse4", function(down)
+    print("side back", down and "pressed" or "released")
+end, "both")
+
 hk:Disconnect()</code></pre>
         <p>Bindings are cleared automatically when the VM stops or reloads.</p>
 
         <h2 id="mouse">Mouse</h2>
         <p>Access via <code>LocalPlayer:GetMouse()</code>.</p>
         <p><strong>Fields:</strong> <code>.X</code>, <code>.Y</code> (X11 root coords), <code>.Hit</code> (CFrame at pointer target, camera raycast 5000 studs, identity rotation), <code>.Target</code> (Instance under pointer, nil if nothing).</p>
-        <p><strong>Signals:</strong> <code>.Move</code>, <code>.Button1Down</code>, <code>.Button1Up</code>, <code>.Button2Down</code>, <code>.Button2Up</code>.</p>
+        <p><strong>Signals:</strong> <code>.Move</code>, <code>.Button1Down/Up</code> (LMB), <code>.Button2Down/Up</code> (RMB), <code>.Button3Down/Up</code> (MMB), <code>.Button4Down/Up</code> (side back / Mouse4), <code>.Button5Down/Up</code> (side forward / Mouse5).</p>
         <p><code>.Hit</code> and <code>.Target</code> reuse <code>workspace:Raycast</code>, so they share the OOBB limits. MeshPart triangles and Terrain will not register.</p>
 
         <h2 id="http">HttpService</h2>

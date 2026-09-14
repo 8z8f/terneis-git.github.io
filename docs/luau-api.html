@@ -47,6 +47,7 @@
             <li><a href="#watchers">watchers</a></li>
             <li><a href="#uis">userinputservice</a></li>
             <li><a href="#keybinds">keybinds</a></li>
+            <li><a href="#keyboard">keyboard</a></li>
             <li><a href="#mouse">mouse</a></li>
             <li><a href="#http">httpservice</a></li>
             <li><a href="#bindable">bindableevent / function</a></li>
@@ -308,6 +309,47 @@ end, "both")
 
 hk:Disconnect()</code></pre>
         <p>Bindings are cleared automatically when the VM stops or reloads.</p>
+
+        <h2 id="keyboard">Keyboard (synthetic input)</h2>
+        <p>The <code>keyboard</code> global sends synthetic key presses through <code>/dev/uinput</code>. Events land in whichever window currently has focus, so click into Sober before firing off a macro; events fired while the overlay's editor is focused will type into the editor.</p>
+
+        <table style="width:100%;border-collapse:collapse;font-size:13.5px">
+            <tbody>
+                <tr><td style="padding:6px 10px"><code>keyboard.press(key)</code></td><td style="padding:6px 10px">hold the key down (no auto-release)</td></tr>
+                <tr><td style="padding:6px 10px"><code>keyboard.release(key)</code></td><td style="padding:6px 10px">release a previously held key</td></tr>
+                <tr><td style="padding:6px 10px"><code>keyboard.tap(key)</code></td><td style="padding:6px 10px">press then release immediately</td></tr>
+                <tr><td style="padding:6px 10px"><code>keyboard.type(str)</code></td><td style="padding:6px 10px">tap the sequence of keys that spells <code>str</code>, including shift for capitals</td></tr>
+            </tbody>
+        </table>
+
+        <p>Every function accepts the same three key forms as <code>keybind()</code>:</p>
+        <ul>
+            <li>A string name: <code>"F"</code>, <code>"space"</code>, <code>"leftshift"</code>, <code>"return"</code>, <code>"f1"</code>, <code>"kp5"</code>, <code>"/"</code>, and so on. Case-insensitive. See the source table in <code>uinput_keyboard.cpp</code> for the full list.</li>
+            <li>An <code>Enum.KeyCode.X</code> userdata.</li>
+            <li>A raw Roblox KeyCode integer (32 = space, 97..122 = a..z, 273..276 = arrows, etc.).</li>
+        </ul>
+
+        <pre><code>-- macro: tap W five times with 100ms between presses
+for i = 1, 5 do
+    keyboard.tap("W")
+    task.wait(0.1)
+end
+
+-- hold Shift while jumping
+keyboard.press("LeftShift")
+keyboard.tap("Space")
+keyboard.release("LeftShift")
+
+-- type a chat message: open Roblox chat, wait, type, submit
+keyboard.tap("Slash")
+task.wait(0.2)
+keyboard.type("hello world")
+keyboard.tap("Return")
+
+-- Enum.KeyCode form
+keyboard.tap(Enum.KeyCode.E)</code></pre>
+
+        <p><strong>Requires</strong> <code>/dev/uinput</code> to be accessible by the running user; most distros grant this via the <code>input</code> group. If the device did not initialize, all four functions become no-ops silently.</p>
 
         <h2 id="mouse">Mouse</h2>
         <p>Access via <code>LocalPlayer:GetMouse()</code>.</p>

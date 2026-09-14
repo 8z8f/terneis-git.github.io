@@ -166,6 +166,8 @@
                 <tr><td style="padding:6px 10px"><code>:GetFullName()</code></td><td style="padding:6px 10px">Parent chain joined with <code>.</code>, up to 64 hops</td></tr>
                 <tr><td style="padding:6px 10px"><code>:IsA(class)</code></td><td style="padding:6px 10px">walks the class hierarchy</td></tr>
                 <tr><td style="padding:6px 10px"><code>:GetService(cls)</code> / <code>:service(cls)</code></td><td style="padding:6px 10px">cached child-by-class lookup, intercepts UIS and HttpService</td></tr>
+                <tr><td style="padding:6px 10px"><code>:HttpGet(url)</code> / <code>:HttpGetAsync(url)</code></td><td style="padding:6px 10px">shortcut for HttpService:GetAsync. Blocks until response, 15s timeout.</td></tr>
+                <tr><td style="padding:6px 10px"><code>:HttpPost(url, body, ct?)</code> / <code>:HttpPostAsync(url, body, ct?)</code></td><td style="padding:6px 10px">shortcut for HttpService:PostAsync. Default content-type <code>application/json</code>.</td></tr>
                 <tr><td style="padding:6px 10px"><code>:GetPropertyChangedSignal(prop)</code></td><td style="padding:6px 10px">Signal that fires when the property changes (poll-based)</td></tr>
                 <tr><td style="padding:6px 10px"><code>:GetAttribute(name)</code></td><td style="padding:6px 10px">returns nil <span class="tag warn">stub</span></td></tr>
                 <tr><td style="padding:6px 10px"><code>:GetAttributes()</code></td><td style="padding:6px 10px">returns empty table <span class="tag warn">stub</span></td></tr>
@@ -207,6 +209,11 @@
                 <tr><td style="padding:6px 10px">RunService</td><td style="padding:6px 10px">Heartbeat (Signal), RenderStepped (Signal), Stepped (aliased to Heartbeat)</td><td style="padding:6px 10px"></td></tr>
                 <tr><td style="padding:6px 10px">Workspace</td><td style="padding:6px 10px">CurrentCamera</td><td style="padding:6px 10px">Gravity</td></tr>
                 <tr><td style="padding:6px 10px">ProximityPrompt</td><td style="padding:6px 10px">KeyboardKeyCode, ActionText, ObjectText</td><td style="padding:6px 10px">Enabled, RequiresLineOfSight, HoldDuration, MaxActivationDistance</td></tr>
+                <tr><td style="padding:6px 10px">MeshPart</td><td style="padding:6px 10px"></td><td style="padding:6px 10px">MeshId, TextureId / TextureID (heap-string; writes only when new length fits in existing buffer capacity)</td></tr>
+                <tr><td style="padding:6px 10px">SpecialMesh, BlockMesh, CylinderMesh, FileMesh</td><td style="padding:6px 10px"></td><td style="padding:6px 10px">MeshId, TextureId / TextureID, Scale, Offset (packed rbx_name for the string fields; MeshId writes usually trigger a live visual reload)</td></tr>
+                <tr><td style="padding:6px 10px">CharacterMesh</td><td style="padding:6px 10px">BodyPart</td><td style="padding:6px 10px">MeshId, BaseTextureId, OverlayTextureId</td></tr>
+                <tr><td style="padding:6px 10px">BloomEffect</td><td style="padding:6px 10px"></td><td style="padding:6px 10px">Intensity, Size, Threshold</td></tr>
+                <tr><td style="padding:6px 10px">Attachment</td><td style="padding:6px 10px"></td><td style="padding:6px 10px">Visible</td></tr>
                 <tr><td style="padding:6px 10px">ObjectValue</td><td style="padding:6px 10px"></td><td style="padding:6px 10px">Value (Instance / nil)</td></tr>
                 <tr><td style="padding:6px 10px">StringValue</td><td style="padding:6px 10px">Value (string)</td><td style="padding:6px 10px"></td></tr>
                 <tr><td style="padding:6px 10px">NumberValue</td><td style="padding:6px 10px"></td><td style="padding:6px 10px">Value (double)</td></tr>
@@ -217,6 +224,21 @@
                 <tr><td style="padding:6px 10px">Color3Value</td><td style="padding:6px 10px"></td><td style="padding:6px 10px">Value (Color3)</td></tr>
             </tbody>
         </table>
+
+        <h3 id="mesh-writes">Writing MeshId / TextureId</h3>
+        <p>Roblox stores content strings (MeshId, TextureId, etc.) in two different memory layouts depending on class, and the external does in-place writes only. Consequences:</p>
+        <ul>
+            <li><strong>MeshPart</strong> uses a heap-string layout (capacity, size, data pointer). Writes succeed when the new string length is not greater than the buffer capacity that Roblox originally allocated. Longer values fail with <code>MeshId write failed (new length exceeds buffer capacity)</code>.</li>
+            <li><strong>SpecialMesh, BlockMesh, CylinderMesh, FileMesh, CharacterMesh</strong> use a packed rbx_name layout (fmt byte plus inline chars or heap pointer). Writes succeed for values up to 31 chars inline, or up to the existing heap length when the current value is heap-backed.</li>
+            <li>A MeshPart's on-screen mesh is decoded from the URL at spawn and cached as geometry. Rewriting <code>MeshId</code> updates the URL string in memory but does not by itself trigger a re-fetch, so the visual usually stays the same.</li>
+            <li>A SpecialMesh reloads its mesh from the URL whenever <code>MeshId</code> changes on the Roblox side, so external writes typically do update the visual.</li>
+            <li>Setting a content field to the empty string always succeeds.</li>
+        </ul>
+
+        <pre><code>local sword_mesh = game.Workspace.Sword.Handle.Mesh   -- a SpecialMesh
+sword_mesh.MeshId    = "rbxassetid://12221720"
+sword_mesh.TextureId = ""
+sword_mesh.Scale     = Vector3.new(2, 2, 2)</code></pre>
 
         <h2 id="signals">Signals</h2>
         <p><code>Signal:Connect(fn)</code> or <code>:connect(fn)</code> or <code>:Once(fn)</code> returns a Connection.</p>

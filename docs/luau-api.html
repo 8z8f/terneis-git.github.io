@@ -55,6 +55,10 @@
             <li><a href="#windows">windows</a></li>
             <li><a href="#drawing">drawing</a></li>
             <li><a href="#raycasting">raycasting</a></li>
+            <li><a href="#gc">garbage collector</a></li>
+            <li><a href="#functions">functions</a></li>
+            <li><a href="#scripts">scripts &amp; decompiling</a></li>
+            <li><a href="#files">files</a></li>
             <li><a href="#hierarchy">class hierarchy</a></li>
             <li><a href="#log">console log tags</a></li>
             <li><a href="#not-yet">not yet supported</a></li>
@@ -479,6 +483,92 @@ Drawing.clear()  -- remove all</code></pre>
         <p><strong>RaycastParams</strong> is a plain table from <code>RaycastParams.new()</code>: <code>FilterDescendantsInstances</code> (Instance[]), <code>FilterType</code> (<code>"Include"</code> / <code>"Exclude"</code> or Enum), <code>IgnoreWater</code> (accepted, not enforced).</p>
         <p><strong>RaycastResult</strong> is a plain table: <code>Position</code>, <code>Normal</code>, <code>Distance</code>, <code>Instance</code>, <code>Material</code> (placeholder <code>"Enum.Material.Plastic"</code>).</p>
         <p><strong>Limits:</strong> OOBB approximation, walks up to 8192 BaseParts, no CollisionGroup, no MeshPart triangles, no Terrain voxels.</p>
+
+        <h2 id="gc">Garbage collector</h2>
+        <p>These walk the game's Luau heap from outside the process. Game tables come back as proxy tables: reading a field reads game memory, and assigning a number, boolean or nil writes it back. Strings and tables can't be written. A full walk can take a second in big games, so run it once and keep the result.</p>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <tbody>
+                <tr><td style="padding:6px 10px"><code>getgc(true)</code></td><td style="padding:6px 10px">iterator over every game table, use it as <code>for _, t in getgc(true) do</code></td></tr>
+                <tr><td style="padding:6px 10px"><code>getgc("key")</code></td><td style="padding:6px 10px">list of hits for tables that have the string key <code>key</code></td></tr>
+                <tr><td style="padding:6px 10px"><code>getgc({"a", "b", ...})</code></td><td style="padding:6px 10px"><code>{a = {hit, ...}, b = {hit, ...}}</code>, one list per key, empty if nothing matched</td></tr>
+                <tr><td style="padding:6px 10px"><code>findgc(key, value?)</code></td><td style="padding:6px 10px">iterator over tables with the string key, optionally only where its value is the string <code>value</code>. <code>findgc(nil, value)</code> matches on the value alone</td></tr>
+                <tr><td style="padding:6px 10px"><code>getrawkeys(t)</code></td><td style="padding:6px 10px">snapshot of a proxy as a plain <code>{key = value}</code> table, string keys only</td></tr>
+                <tr><td style="padding:6px 10px"><code>applygc(list, key, value)</code></td><td style="padding:6px 10px">writes <code>value</code> to <code>key</code> on every hit in <code>list</code>, returns the write count</td></tr>
+                <tr><td style="padding:6px 10px"><code>applygc(cache, {key = value, ...})</code></td><td style="padding:6px 10px">same, for a <code>getgc({...})</code> result and several keys at once</td></tr>
+                <tr><td style="padding:6px 10px"><code>setgc(option, value?)</code></td><td style="padding:6px 10px"><code>"stop"</code>, <code>"restart"</code>, <code>"isrunning"</code>, <code>"count"</code> (KB), <code>"pause"</code>, <code>"stepmul"</code>. The last two return the old value and set a new one if given</td></tr>
+                <tr><td style="padding:6px 10px"><code>rawget(t, k)</code></td><td style="padding:6px 10px">also works on proxies</td></tr>
+            </tbody>
+        </table>
+        <p><strong>Hits</strong> are tables with <code>.proxy</code> (the game table) and <code>.node</code> (the address of the slot holding the key). <code>getgc("key")</code> hits also carry <code>.key</code> and <code>.vtt</code>, the value's type tag: 0 nil, 1 boolean, 3 number, 6 string, 7 table, 8 function. <code>applygc</code> writes straight to <code>.node</code>, so repeat writes don't search the table again.</p>
+        <pre><code>local hits = getgc({"ShootCooldown", "ShootRecoil", "ShootSpread"})
+applygc(hits, {ShootCooldown = 0.05, ShootRecoil = 0, ShootSpread = 0})
+
+-- some games reset these on equip, so keep writing
+task.spawn(function()
+    while true do
+        applygc(hits, {ShootRecoil = 0})
+        task.wait(0.2)
+    end
+end)</code></pre>
+        <p>If a weapon is recreated (respawn, re-equip) its old slots stop updating. Call <code>getgc</code> again to pick up the new table.</p>
+
+        <h2 id="functions">Functions</h2>
+        <p><code>getfunctions(filter?)</code> returns the game's Lua functions as plain tables. C functions are skipped. All filter fields are optional:</p>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <tbody>
+                <tr><td style="padding:6px 10px"><code>name</code></td><td style="padding:6px 10px">exact debug name, e.g. <code>"fire"</code></td></tr>
+                <tr><td style="padding:6px 10px"><code>source</code></td><td style="padding:6px 10px">substring of the script path the function came from</td></tr>
+                <tr><td style="padding:6px 10px"><code>constant</code></td><td style="padding:6px 10px">a number or string the function uses</td></tr>
+                <tr><td style="padding:6px 10px"><code>limit</code></td><td style="padding:6px 10px">stop after this many results, default 5000</td></tr>
+            </tbody>
+        </table>
+        <p>Each result has <code>.name</code>, <code>.source</code>, <code>.line</code>, <code>.params</code>, <code>.upvalues</code> and <code>.constants</code> (counts), plus <code>.address</code> and <code>.proto</code>. <code>tostring(fn)</code> gives <code>function name (source:line)</code>.</p>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <tbody>
+                <tr><td style="padding:6px 10px"><code>getupvalues(fn)</code> / <code>getupvalue(fn, i)</code></td><td style="padding:6px 10px">locals the function captured</td></tr>
+                <tr><td style="padding:6px 10px"><code>setupvalue(fn, i, value)</code></td><td style="padding:6px 10px">overwrite a captured local</td></tr>
+                <tr><td style="padding:6px 10px"><code>getconstants(fn)</code> / <code>getconstant(fn, i)</code></td><td style="padding:6px 10px">constants baked into the bytecode</td></tr>
+                <tr><td style="padding:6px 10px"><code>setconstant(fn, i, value)</code></td><td style="padding:6px 10px">overwrite a number or boolean constant</td></tr>
+            </tbody>
+        </table>
+        <p>The same six are also on <code>debug</code>. Indices start at 1. Values come back as numbers, booleans, strings, nil, game tables (proxies) or function tables. Anything else shows up as a string such as <code>"&lt;userdata&gt;"</code>. Writes take numbers, booleans and nil.</p>
+        <p><code>setconstant</code> edits the bytecode, so every copy of that function changes, not just one. Small whole numbers are usually encoded in the instructions themselves and won't appear in <code>getconstants</code>; decimals like <code>0.5</code> will. An upvalue can be shared by several functions, and <code>setupvalue</code> changes it for all of them.</p>
+        <pre><code>for _, fn in ipairs(getfunctions({ source = "Gun", constant = 0.5 })) do
+    print(fn)
+    for i, v in ipairs(getconstants(fn)) do
+        if v == 0.5 then setconstant(fn, i, 0.05) end
+    end
+end</code></pre>
+
+        <h2 id="scripts">Scripts and decompiling</h2>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <tbody>
+                <tr><td style="padding:6px 10px"><code>getscripts()</code></td><td style="padding:6px 10px">every LocalScript and ModuleScript under <code>game</code></td></tr>
+                <tr><td style="padding:6px 10px"><code>getscriptbytecode(script)</code></td><td style="padding:6px 10px">raw bytecode string, or <code>nil, reason</code></td></tr>
+                <tr><td style="padding:6px 10px"><code>decompile(script)</code></td><td style="padding:6px 10px">source string. On failure you get one line starting with <code>-- decompile:</code> and the reason</td></tr>
+            </tbody>
+        </table>
+        <p><code>getscripts</code> walks the instance tree, so scripts parented to nil aren't included. Server <code>Script</code>s have no bytecode on the client. In the Explorer, right-click a script for <strong>Decompile to clipboard</strong> or <strong>Decompile to editor</strong>; both run in the background.</p>
+        <pre><code>local scripts = getscripts()
+for _, s in ipairs(scripts) do
+    local path = s:GetFullName():gsub("[^%w%._%-]", "_")
+    writefile("decompiled/" .. path .. ".lua", decompile(s))
+end
+print(#scripts .. " scripts dumped")</code></pre>
+
+        <h2 id="files">Files</h2>
+        <p>Paths are relative to <code>~/.config/nyx/workspace</code>. Absolute paths and <code>..</code> are rejected.</p>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <tbody>
+                <tr><td style="padding:6px 10px"><code>writefile(path, data)</code></td><td style="padding:6px 10px">creates or replaces the file, making folders as needed</td></tr>
+                <tr><td style="padding:6px 10px"><code>appendfile(path, data)</code></td><td style="padding:6px 10px">adds to the end, creates the file if missing</td></tr>
+                <tr><td style="padding:6px 10px"><code>readfile(path)</code></td><td style="padding:6px 10px">file contents, or nil</td></tr>
+                <tr><td style="padding:6px 10px"><code>isfile(path)</code> / <code>isfolder(path)</code></td><td style="padding:6px 10px">boolean</td></tr>
+                <tr><td style="padding:6px 10px"><code>makefolder(path)</code></td><td style="padding:6px 10px">creates the folder and any parents</td></tr>
+                <tr><td style="padding:6px 10px"><code>delfile(path)</code></td><td style="padding:6px 10px">deletes a file or an empty folder</td></tr>
+                <tr><td style="padding:6px 10px"><code>listfiles(path?)</code></td><td style="padding:6px 10px">entries in a folder (workspace root if omitted), relative to the workspace</td></tr>
+            </tbody>
+        </table>
 
         <h2 id="hierarchy">Class hierarchy (for IsA)</h2>
         <pre><code>Instance
